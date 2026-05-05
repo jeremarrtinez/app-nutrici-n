@@ -549,11 +549,18 @@
         <div class="card">
           <div class="card-title">🔑 API Key de Anthropic</div>
           <div class="field-group">
-            <label class="field-label">Tu API Key (guardada solo en tu dispositivo)</label>
-            <input class="field-input" id="api-key-input" type="password" placeholder="sk-ant-api03-...">
+            <label class="field-label">Tu API Key (se guarda automáticamente)</label>
+            <div style="position:relative">
+              <input class="field-input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." oninput="saveApiKeyInstant(this.value)" style="width:100%; padding-right:90px">
+              <span id="api-key-status" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);pointer-events:none"></span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="toggleApiKeyVisibility()">👁️ Mostrar/ocultar</button>
+            <span id="api-key-saved-badge" style="display:none;font-size:11px;color:var(--accent)">✅ Guardada</span>
           </div>
           <div style="font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5">
-            Obtenela en <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">console.anthropic.com</a>. Se guarda solo en tu navegador, nunca en ningún servidor.
+            Obtenela en <a href="https://console.anthropic.com/settings/keys" style="color:var(--accent)">console.anthropic.com</a>. Se guarda solo en tu dispositivo, nunca en ningún servidor.
           </div>
         </div>
 
@@ -692,6 +699,34 @@ function loadSettings() {
   document.getElementById('s-sugar').value = settings.sugar;
   document.getElementById('s-sodium').value = settings.sodium;
   document.getElementById('api-key-input').value = settings.apiKey;
+  if (settings.apiKey) {
+    const status = document.getElementById('api-key-status');
+    const badge = document.getElementById('api-key-saved-badge');
+    if(status) { status.textContent = '✅ guardada'; status.style.color = 'var(--accent)'; }
+    if(badge) badge.style.display = 'inline';
+  }
+}
+
+function saveApiKeyInstant(val) {
+  val = val.trim();
+  settings.apiKey = val;
+  localStorage.setItem('nutrilens_settings', JSON.stringify(settings));
+  const status = document.getElementById('api-key-status');
+  const badge = document.getElementById('api-key-saved-badge');
+  if (val) {
+    status.textContent = '✅ guardada';
+    status.style.color = 'var(--accent)';
+    if(badge) badge.style.display = 'inline';
+  } else {
+    status.textContent = '';
+    if(badge) badge.style.display = 'none';
+  }
+  checkApiKey();
+}
+
+function toggleApiKeyVisibility() {
+  const input = document.getElementById('api-key-input');
+  input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 function saveSettings() {
